@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AiCtf.Sdk
+﻿namespace AiCtf.Sdk
 {
     public class Ship : GameEntity
     {
-        public string Label { get; internal set; }
-        public float Thrust { get; internal set; }
-        public float Torque { get; internal set; }
-        public bool IsFiring { get; internal set; }
+        public string Label { get; set; }
+        public float Thrust { get; set; }
+        public float Torque { get; set; }
+        public bool IsFiring { get; set; }
 
         public Ship Clone()
         {

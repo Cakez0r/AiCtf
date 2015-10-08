@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AiCtf.Sdk
 {
     public class GameEntity
     {
-        public Guid Id { get; internal set; }
-        public Guid Owner { get; internal set; }
-        public BoundingCircle Bounds { get; internal set; }
-        public Vector2 Velocity { get; internal set; }
-        public float Rotation { get; internal set; }
-        public float AngularVelocity { get; internal set; }
+        public Guid Id { get; set; }
+        public Guid Owner { get; set; }
+        public BoundingCircle Bounds { get; set; }
+        public Vector2 Velocity { get; set; }
+        public float Rotation { get; set; }
+        public float AngularVelocity { get; set; }
 
         public Vector2 Position
         {

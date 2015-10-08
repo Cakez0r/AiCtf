@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiCtf", "AiCtf\AiCtf.csproj", "{5045E361-57D9-425B-B97C-44155E76A6D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiCtf.Sdk", "AiCtf.Sdk\AiCtf.Sdk.csproj", "{A72C5872-D817-4EEC-A21F-AF7286385A9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AiCtf.Sdk", "AiCtf.Sdk\AiCtf.Sdk.csproj", "{4D61D954-241F-4EE4-97BC-9408CEA555A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{5045E361-57D9-425B-B97C-44155E76A6D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5045E361-57D9-425B-B97C-44155E76A6D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5045E361-57D9-425B-B97C-44155E76A6D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A72C5872-D817-4EEC-A21F-AF7286385A9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A72C5872-D817-4EEC-A21F-AF7286385A9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A72C5872-D817-4EEC-A21F-AF7286385A9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A72C5872-D817-4EEC-A21F-AF7286385A9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D61D954-241F-4EE4-97BC-9408CEA555A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D61D954-241F-4EE4-97BC-9408CEA555A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D61D954-241F-4EE4-97BC-9408CEA555A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D61D954-241F-4EE4-97BC-9408CEA555A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

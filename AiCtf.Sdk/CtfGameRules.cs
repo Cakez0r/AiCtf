@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AiCtf.Sdk
+﻿namespace AiCtf.Sdk
 {
     public class CtfGameRules
     {
@@ -22,6 +16,7 @@ namespace AiCtf.Sdk
         public float TorquePower { get; set; }
 
         public int TurnLimit { get; set; }
+        public int FlagLimit { get; set; }
 
         public int FireCooldown { get; set; }
 

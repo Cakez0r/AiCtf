@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AiCtf.Sdk
 {
     public class Projectile : GameEntity
     {
-        public Guid FiredBy { get; internal set; }
+        public Guid FiredBy { get; set; }
 
         public Projectile Clone()
         {

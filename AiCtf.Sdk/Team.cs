@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AiCtf.Sdk
 {
     public class Team
     {
-        public Guid Id { get; internal set; }
-        public string Name { get; internal set; }
-        public Flag Flag { get; internal set; }
-        public IList<Ship> Ships { get; internal set; }
-        public IList<Projectile> Projectiles { get; internal set; }
-        public int FlagCaptures { get; internal set; }
-        public int Kills { get; internal set; }
+        public Guid Id { get; set; }
+        public string Name { get; set; }
+        public Flag Flag { get; set; }
+        public IList<Ship> Ships { get; set; }
+        public IList<Projectile> Projectiles { get; set; }
+        public int FlagCaptures { get; set; }
+        public int Kills { get; set; }
 
         public Team()
         {

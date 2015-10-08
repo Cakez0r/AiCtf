@@ -6,13 +6,11 @@
 
     using System;
     using System.Diagnostics;
-    using System.Runtime.Serialization;
 
     /// <summary>
     /// Describes a 2D-vector.
     /// </summary>
 
-    [DataContract]
     [DebuggerDisplay("{DebugDisplayString,nq}")]
     public struct Vector2 : IEquatable<Vector2>
     {
@@ -30,13 +28,11 @@
         /// <summary>
         /// The x coordinate of this <see cref="Vector2"/>.
         /// </summary>
-        [DataMember]
         public float X;
 
         /// <summary>
         /// The y coordinate of this <see cref="Vector2"/>.
         /// </summary>
-        [DataMember]
         public float Y;
 
         #endregion Public Fields

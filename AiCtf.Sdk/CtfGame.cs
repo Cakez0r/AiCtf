@@ -1,29 +1,38 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AiCtf.Sdk
 {
     public class CtfGame
     {
+        [JsonProperty]
         public IList<CtfGameState> States { get; private set; }
 
+        [JsonProperty]
         public CtfGameRules Rules { get; private set; }
 
-        public Dictionary<Guid, ICtfAi> AIs { get; private set; }
+        [JsonProperty]
+        public Dictionary<Guid, Vector2> SpawnPositions { get; private set; }
 
-        public CtfGameState CurrentState { get; private set; }
+        [JsonProperty]
+        public Guid? WinningTeam { get; private set; }
 
         private Dictionary<Guid, int> m_lastFireTurns = new Dictionary<Guid, int>();
+        private Dictionary<Guid, ICtfAi> m_ais = new Dictionary<Guid, ICtfAi>();
+        private CtfGameState m_currentState;
 
-        private Dictionary<Guid, Vector2> m_positions = new Dictionary<Guid, Vector2>();
+        [JsonConstructor]
+        internal CtfGame()
+        {
+
+        }
 
         public CtfGame(CtfGameRules rules, IList<ICtfAi> ais)
         {
+            SpawnPositions = new Dictionary<Guid, Vector2>();
             Rules = rules;
-            AIs = new Dictionary<Guid, ICtfAi>();
             States = new List<CtfGameState>(Rules.TurnLimit);
 
             float teamSpacing = MathHelper.TwoPi / ais.Count;
@@ -48,9 +57,9 @@ namespace AiCtf.Sdk
                     Bounds = new BoundingCircle(Vector2.FromPolar(flagRadius, teamSpacing * teamIndex), Rules.FlagRadius),
                     Owner = team.Id,
                 };
-                m_positions[team.Flag.Id] = team.Flag.Position;
+                SpawnPositions[team.Flag.Id] = team.Flag.Position;
 
-                AIs[team.Id] = ai;
+                m_ais[team.Id] = ai;
 
                 team.Ships = new List<Ship>();
                 
@@ -63,7 +72,7 @@ namespace AiCtf.Sdk
                         Rotation = (i * shipSpacing) + MathHelper.Pi,
                     };
 
-                    m_positions[ship.Id] = ship.Position;
+                    SpawnPositions[ship.Id] = ship.Position;
                     m_lastFireTurns[ship.Id] = int.MinValue;
 
                     team.Ships.Add(ship);
@@ -77,12 +86,12 @@ namespace AiCtf.Sdk
             }
 
             States.Add(initialState);
-            CurrentState = initialState;
+            m_currentState = initialState;
         }
 
         public void Initialise()
         {
-            foreach (var ai in AIs)
+            foreach (var ai in m_ais)
             {
                 ai.Value.Initialize(Rules, ai.Key);
             }
@@ -90,8 +99,15 @@ namespace AiCtf.Sdk
 
         public void Step()
         {
-            IDictionary<Guid, Ship> masterShips = CurrentState.Teams.SelectMany(t => t.Ships).ToDictionary(s => s.Id);
-            IDictionary<Guid, Team> masterTeams = CurrentState.Teams.ToDictionary(t => t.Id);
+            if (States.Count == Rules.TurnLimit || m_currentState.Teams.Any(t => t.FlagCaptures == Rules.FlagLimit))
+            {
+                var winningTeam = m_currentState.Teams.OrderByDescending(t => t.FlagCaptures).ThenByDescending(t => t.Kills).FirstOrDefault();
+                WinningTeam = winningTeam.Id;
+                return;
+            }
+
+            IDictionary<Guid, Ship> masterShips = m_currentState.Teams.SelectMany(t => t.Ships).ToDictionary(s => s.Id);
+            IDictionary<Guid, Team> masterTeams = m_currentState.Teams.ToDictionary(t => t.Id);
             IDictionary<Guid, CtfGameState> updates = new Dictionary<Guid, CtfGameState>();
             HashSet<Guid> deadProjectiles = new HashSet<Guid>();
 
@@ -119,7 +135,19 @@ namespace AiCtf.Sdk
                             {
                                 //Ship hit
                                 deadProjectiles.Add(projectile.Id);
-                                enemyShip.Position = m_positions[enemyShip.Id];
+                                enemyShip.Position = SpawnPositions[enemyShip.Id];
+                                team.Kills++;
+
+                                //Reset flag position if the killed ship was holding a flag
+                                foreach (var t in masterTeams.Values)
+                                {
+                                    if (t.Flag.HeldBy == enemyShip.Id)
+                                    {
+                                        t.Flag.HeldBy = null;
+                                        t.Flag.Position = SpawnPositions[team.Flag.Id];
+                                    }
+                                }
+
                                 continue;
                             }
                         }
@@ -135,17 +163,58 @@ namespace AiCtf.Sdk
                         continue;
                     }
                 }
+
+                team.Projectiles = team.Projectiles.Where(p => !deadProjectiles.Contains(p.Id)).ToList();
             }
 
             foreach (var team in masterTeams.Values)
             {
-                team.Projectiles = team.Projectiles.Where(p => !deadProjectiles.Contains(p.Id)).ToList();
+                if (team.Flag.HeldBy != null)
+                {
+                    var holder = masterShips[team.Flag.HeldBy.Value];
+
+                    team.Flag.Position = holder.Position;
+
+                    var holderTeam = masterTeams[holder.Owner];
+                    if (holderTeam.Flag.HeldBy == null && holderTeam.Flag.Bounds.Intersects(team.Flag.Bounds))
+                    {
+                        holderTeam.FlagCaptures++;
+
+                        team.Flag.HeldBy = null;
+                        team.Flag.Position = SpawnPositions[team.Flag.Id];
+                    }
+                }
+                else
+                {
+                    foreach (var enemyTeam in masterTeams.Values)
+                    {
+                        if (enemyTeam.Id == team.Id)
+                        {
+                            continue;
+                        }
+
+                        foreach (var ship in enemyTeam.Ships)
+                        {
+                            if (ship.Bounds.Intersects(team.Flag.Bounds))
+                            {
+                                team.Flag.HeldBy = ship.Id;
+                                break;
+                            }
+                        }
+
+                        if (team.Flag.HeldBy != null)
+                        {
+                            break;
+                        }
+                    }
+                }
             }
 
+
             //AI Act
-            foreach (var ai in AIs)
+            foreach (var ai in m_ais)
             {
-                var aiStateCopy = CurrentState.Clone();
+                var aiStateCopy = m_currentState.Clone();
                 ai.Value.Update(aiStateCopy, aiStateCopy.Teams.First(t => t.Id == ai.Key).Ships);
                 updates[ai.Key] = aiStateCopy;
             }
@@ -193,9 +262,9 @@ namespace AiCtf.Sdk
                 {
                     int lastFireTurn = m_lastFireTurns[ship.Id];
 
-                    if (CurrentState.TurnNumber - lastFireTurn > Rules.FireCooldown)
+                    if (m_currentState.TurnNumber - lastFireTurn > Rules.FireCooldown)
                     {
-                        m_lastFireTurns[ship.Id] = CurrentState.TurnNumber;
+                        m_lastFireTurns[ship.Id] = m_currentState.TurnNumber;
 
                         var team = masterTeams[ship.Owner];
                         team.Projectiles.Add(new Projectile()
@@ -212,7 +281,8 @@ namespace AiCtf.Sdk
             }
 
             //Step physics
-            CurrentState = Step(CurrentState);
+            m_currentState = Step(m_currentState);
+            States.Add(m_currentState);
         }
 
         private CtfGameState Step(CtfGameState state)
