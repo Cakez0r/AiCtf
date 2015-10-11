@@ -1,22 +1,30 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 
 namespace AiCtf.Sdk
 {
+    /// <summary>
+    /// The state of a projectile
+    /// </summary>
     public class Projectile : GameEntity
     {
-        public Guid FiredBy { get; set; }
+        /// <summary>
+        /// The id of the ship that fired this projectile
+        /// </summary>
+        [JsonProperty]
+        public int FiredBy { get; internal set; }
 
+        /// <summary>
+        /// Clone this projectile
+        /// </summary>
         public Projectile Clone()
         {
             return new Projectile()
             {
-                AngularVelocity = AngularVelocity,
                 Bounds = Bounds,
                 FiredBy = FiredBy,
                 Id = Id,
                 Owner = Owner,
                 Position = Position,
-                Rotation = Rotation,
                 Velocity = Velocity
             };
         }

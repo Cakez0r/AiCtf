@@ -40,10 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BoundingCircle.cs" />
-    <Compile Include="CtfAi.cs" />
+    <Compile Include="ICtfAi.cs" />
     <Compile Include="CtfGame.cs" />
     <Compile Include="CtfGameRules.cs" />
     <Compile Include="CtfGameState.cs" />
+    <Compile Include="CtfId.cs" />
     <Compile Include="Flag.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="MathHelper.cs" />

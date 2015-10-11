@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace AiCtf
 {
@@ -10,30 +11,26 @@ namespace AiCtf
     {
         static void Main(string[] args)
         {
-            CtfGame game = new CtfGame(new CtfGameRules()
+            CtfGame game = new CtfGame(new CtfGameRules(), new List<ICtfAi>()
             {
-                ArenaRadius = 512,
-                FireCooldown = 100,
-                FlagRadius = 32,
-                MaxShipAngularVelocity = 0.5f,
-                MaxShipVelocity = 16,
-                ProjectileRadius = 8,
-                ProjectileVelocity = 64,
-                ShipRadius = 32,
-                ShipsPerTeam = 5,
-                ThrustPower = 0.5f,
-                TorquePower = 0.01f,
-                TurnLimit = 500,
-                FlagLimit = 3
-            },
-            new List<ICtfAi>() { new TestAi() { Name = "One" }, new TestAi() { Name = "Two " } });
+                new TestAi() { Name = "One" },
+                new TestAi() { Name = "Two" }
+            });
 
             game.Initialise();
 
             while (game.WinningTeam == null)
             {
+                var state = game.States.Last();
                 game.Step();
+
+                foreach (var e in state.Events)
+                {
+                    Console.WriteLine(e);
+                }
             }
+
+            Console.ReadKey();
 
             File.Delete("game.json");
             File.WriteAllText("game.json", JsonConvert.SerializeObject(game));
@@ -48,17 +45,33 @@ namespace AiCtf
                 set;
             }
 
-            public void Initialize(CtfGameRules rules, Guid yourTeamId)
+            public void Initialize(CtfGameRules rules, int yourTeamId)
             {
             }
 
-            public void Update(CtfGameState state, IList<Ship> yourShips)
+            public void Update(CtfGameState state, Team yourTeam, IList<Team> enemyTeams)
             {
-                foreach (var s in yourShips)
+                var enemy = enemyTeams[0];
+                foreach (var ship in yourTeam.Ships)
                 {
-                    s.Fire();
-                    s.SetThrust((float)((m_rand.NextDouble() * 2) - 1));
-                    s.SetTorque((float)((m_rand.NextDouble() * 2) - 1));
+                    if (Math.Round(m_rand.NextDouble()) == 0)
+                    {
+                        ship.Fire();
+                    }
+                    else
+                    {
+                        ship.StopFiring();
+                    }
+
+                    ship.SetThrust((float)m_rand.NextDouble());
+
+                    var t = enemy.Flag.HeldBy == ship.Id ? yourTeam.Flag.Position : yourTeam.Flag.HeldBy != null ? yourTeam.Flag.Position : enemy.Flag.Position;
+                    Vector2 target = Vector2.Normalize(t - ship.Position);
+                    if (!(float.IsNaN(target.X) && float.IsNaN(target.Y)))
+                    {
+                        float d = (float)Math.Atan2(target.Y, target.X) - (ship.Rotation + (ship.AngularVelocity * 5));
+                        ship.SetTorque(Math.Sign(d));
+                    }
                 }
             }
         }
