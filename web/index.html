@@ -1,0 +1,150 @@
+<html>
+<head>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        #gameboard {
+            width: 1024px;
+            height: 1024px;
+            border: 1px solid black;
+            border-radius: 50%;
+            zoom: 0.75;
+        }
+
+        .ship {
+            position: absolute;
+            display: 'inline-block';
+            width: 32px;
+            height: 32px;
+            background-color: grey;
+            border-radius: 50%;
+        }
+
+
+
+        .t0 {
+            background-color: red;
+            border-color: red;
+            color: red;
+        }
+
+        .t1 {
+            background-color: blue;
+            border-color: blue;
+            color: blue;
+        }
+
+        .t2 {
+            background-color: green;
+            border-color: green;
+            color: green;
+        }
+
+        .flag {
+            position: absolute;
+            display: 'inline-block';
+            width: 32px;
+            height: 32px;
+            z-index: -1;
+            border-radius: 50%;
+            box-shadow: 0px 0px 6px 6px;
+            border: 6px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .projectile {
+            position: absolute;
+            background-color: white;
+            display: 'inline-block';
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            border-width: 1px;
+            border-style: solid;
+        }
+
+    </style>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="player.js"></script>
+    <script>
+        var ships = {};
+        var projectiles = {};
+        var flags = {};
+
+        var rules = {};
+
+        var progressHandler = function(p) {
+            $('#loading').text("Loading " + parseInt(p * 100) + "%");
+
+            if (p >= 1) {
+                player.play();
+                rules = player.game.Rules;
+            }
+        }
+
+        var frameHandler = function(frame) {
+            for (var i = 0; i < frame.Teams.length; i++) {
+                var team = frame.Teams[i];
+                for (var j = 0; j < team.Ships.length; j++) {
+                    var ship = team.Ships[j];
+                    var shipNode = ships[ship.Id];
+                    if (!shipNode) {
+                        shipNode = $('<div class="ship t' + i + '" />');
+                        $('#gameboard').append(shipNode);
+                        ships[ship.Id] = shipNode;
+                    }
+
+                    shipNode.css("left", ship.Bounds.Center.X + rules.ArenaRadius);
+                    shipNode.css("top", ship.Bounds.Center.Y + rules.ArenaRadius);
+                    shipNode.css("transform", "rotate(" + ship.Rotation + "rad)")
+                }
+
+                for (var p in projectiles) {
+                    projectiles[p].remove();
+                }
+
+                projectiles = {};
+
+                for (var j = 0; j < team.Projectiles.length; j++) {
+                    var projectile = team.Projectiles[j];
+                    var projectileNode = projectiles[projectile.Id];
+                    if (!projectileNode) {
+                        projectileNode = $('<div class="projectile t' + i + '" />');
+                        $('#gameboard').append(projectileNode);
+                        projectiles[projectile.Id] = projectileNode;
+                    }
+
+                    projectileNode.css("left", projectile.Bounds.Center.X + rules.ArenaRadius);
+                    projectileNode.css("top", projectile.Bounds.Center.Y + rules.ArenaRadius);
+                }
+
+                var flag = team.Flag;
+                var flagNode = flags[flag.Id];
+                if (!flagNode) {
+                    flagNode = $('<div class="flag t' + i + '" />');
+                    $('#gameboard').append(flagNode);
+                    flags[flag.Id] = flagNode;
+                }
+
+                flagNode.css("left", flag.Bounds.Center.X + rules.ArenaRadius);
+                flagNode.css("top", flag.Bounds.Center.Y + rules.ArenaRadius);
+            }
+
+            for (var i = 0; i < frame.Events.length; i++) {
+                $('#events').append($('<div/>').text("Turn " + frame.TurnNumber + ": " + frame.Events[i]));
+            }
+        }
+
+        var player = new Player("game.json", progressHandler, frameHandler);
+        player.setPlaybackFps(60);
+
+    </script>
+</head>
+<body>
+    <div id="gameboard">
+    </div>
+    <div id="loading"></div>
+    <div id="events"></div>
+</body>
+</html>
