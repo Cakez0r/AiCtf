@@ -13,17 +13,6 @@
             zoom: 0.75;
         }
 
-        .ship {
-            position: absolute;
-            display: 'inline-block';
-            width: 32px;
-            height: 32px;
-            background-color: grey;
-            border-radius: 50%;
-        }
-
-
-
         .t0 {
             background-color: red;
             border-color: red;
@@ -64,6 +53,14 @@
             border-style: solid;
         }
 
+        .ship {
+            position: absolute;
+            display: 'inline-block';
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: white;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script src="player.js"></script>
@@ -84,6 +81,12 @@
         }
 
         var frameHandler = function(frame) {
+            for (var p in projectiles) {
+                projectiles[p].remove();
+            }
+
+            projectiles = {};
+
             for (var i = 0; i < frame.Teams.length; i++) {
                 var team = frame.Teams[i];
                 for (var j = 0; j < team.Ships.length; j++) {
@@ -99,12 +102,6 @@
                     shipNode.css("top", ship.Bounds.Center.Y + rules.ArenaRadius);
                     shipNode.css("transform", "rotate(" + ship.Rotation + "rad)")
                 }
-
-                for (var p in projectiles) {
-                    projectiles[p].remove();
-                }
-
-                projectiles = {};
 
                 for (var j = 0; j < team.Projectiles.length; j++) {
                     var projectile = team.Projectiles[j];
