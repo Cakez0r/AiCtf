@@ -96,6 +96,8 @@ var Player = function(gamefile, downloadProgressHandler, frameHandler) {
 
         url: gamefile,
 
+		dataType: 'json',
+		
         xhr: function() {
             var xhr = new window.XMLHttpRequest();
 

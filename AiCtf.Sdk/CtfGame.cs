@@ -208,6 +208,12 @@ namespace AiCtf.Sdk
             {
                 foreach (var projectile in team.Projectiles)
                 {
+                    if (deadProjectiles.Contains(projectile.Id))
+                    {
+                        //Check if this projectile was previously hit by another projectile
+                        continue;
+                    }
+
                     //Remove projectiles that go out of bounts
                     if (projectile.Position.Length() > Rules.ArenaRadius)
                     {
@@ -246,6 +252,27 @@ namespace AiCtf.Sdk
                                     }
                                 }
 
+                                continue;
+                            }
+                        }
+
+                        if (deadProjectiles.Contains(projectile.Id))
+                        {
+                            continue;
+                        }
+
+                        foreach (var enemyProjectile in enemyTeam.Projectiles)
+                        {
+                            //check projectile vs projectile
+                            if (enemyProjectile.Bounds.Intersects(projectile.Bounds))
+                            {
+                                string collideLog = string.Format("{0}'s projectile ({1}) collided with {2}'s projectile ({3})", team.Name, projectile.Id, enemyTeam.Name, enemyProjectile.Id);
+                                m_currentState.Events.Add(collideLog);
+
+                                deadProjectiles.Add(enemyProjectile.Id);
+                                deadProjectiles.Add(projectile.Id);
+
+                                
                                 continue;
                             }
                         }
@@ -453,10 +480,10 @@ namespace AiCtf.Sdk
                 ship.Velocity = Vector2.Normalize(ship.Velocity) * Rules.MaxShipVelocity;
             }
 
-            //Clamp ship position to arena bounds
-            if (ship.Position.Length() > Rules.ArenaRadius)
+            //Reflect velocity if out of bounds
+            if (ship.Position.Length() >= Rules.ArenaRadius)
             {
-                ship.Position = Vector2.Normalize(ship.Position) * Rules.ArenaRadius;
+                ship.Velocity = Vector2.Reflect(ship.Velocity, -Vector2.Normalize(ship.Position));
             }
         }
 
