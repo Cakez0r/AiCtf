@@ -485,6 +485,12 @@ namespace AiCtf.Sdk
             {
                 ship.Velocity = Vector2.Reflect(ship.Velocity, -Vector2.Normalize(ship.Position));
             }
+
+            //Clamp position
+            if (ship.Position.Length() > Rules.ArenaRadius)
+            {
+                ship.Position = Vector2.Normalize(ship.Position) * Rules.ArenaRadius;
+            }
         }
 
         private void StepProjectile(Projectile projectile)
